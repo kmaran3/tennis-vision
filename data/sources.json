@@ -1,0 +1,179 @@
+{
+  "checked_on": "2026-11-11",
+  "sources": [
+    {
+      "id": "sackmann_archive",
+      "group": "core",
+      "method": "github",
+      "repo": "Aneeshers/tennis-sackmann-archive",
+      "url": "https://github.com/Aneeshers/tennis-sackmann-archive",
+      "destination": "data/raw/sackmann_archive",
+      "license": "CC BY-NC-SA 4.0; Jeff Sackmann",
+      "coverage": "Mirror reports ATP/WTA snapshots June 2026; Slam points 2011-2024. 2026 is partial.",
+      "required_patterns": ["atp/atp_matches_*.csv", "atp/atp_players.csv", "atp/atp_rankings_*.csv", "wta/wta_matches_*.csv", "wta/wta_players.csv", "wta/wta_rankings_*.csv", "slam_pointbypoint/*-points.csv", "slam_pointbypoint/*-matches.csv"]
+    },
+    {
+      "id": "match_charting",
+      "group": "core",
+      "method": "github",
+      "repo": "JeffSackmann/tennis_MatchChartingProject",
+      "url": "https://github.com/JeffSackmann/tennis_MatchChartingProject",
+      "destination": "data/raw/match_charting",
+      "license": "CC BY-NC-SA 4.0; Tennis Abstract and volunteer charters",
+      "required_patterns": ["charting-m-matches.csv", "charting-w-matches.csv", "charting-m-points-*.csv", "charting-w-points-*.csv", "charting-m-stats-*.csv", "charting-w-stats-*.csv", "data_dictionary.txt"]
+    },
+    {
+      "id": "valuebetennis",
+      "group": "core",
+      "method": "season_csv",
+      "url": "https://www.valuebetennis.com/en/donnees.htm",
+      "download_template": "https://www.valuebetennis.com/datasets/valuebetennis-matchs-{year}.csv",
+      "first_year": 2021,
+      "destination": "data/raw/odds/valuebetennis",
+      "license": "CC BY 4.0; Valuebetennis",
+      "coverage": "2021-current year; ATP/WTA including lower tours; opening and closing Pinnacle odds. Different schema from the original plan.",
+      "required_patterns": ["valuebetennis-matchs-*.csv"]
+    },
+    {
+      "id": "tennis_data_uk",
+      "group": "optional",
+      "method": "manual",
+      "url": "https://www.tennis-data.co.uk/data.php",
+      "destination": "data/raw/odds/tennis_data_uk",
+      "license": "Provider terms; indexed homepage excludes automated bots/scrapers/AI/data-training products. Clarify permission before project use.",
+      "note": "403 through the web tool. Not part of automated acquisition. Manual access does not remove use restrictions."
+    },
+    {
+      "id": "court_keypoints",
+      "group": "vision",
+      "method": "manual",
+      "url": "https://github.com/yastrebksv/TennisCourtDetector",
+      "dataset_url": "https://drive.google.com/file/d/1lhAaeQCmk2y440PmagA0KmIVBIysVMwu/view",
+      "mirror_url": "https://huggingface.co/datasets/oweng/tennis_court_keypoints_dataset",
+      "destination": "data/raw/vision/court_keypoints",
+      "note": "Download dataset archive and extract it; the code repository alone does not contain the dataset. Mirror advertises approximately 7.26 GB."
+    },
+    {
+      "id": "tracknet_dataset",
+      "group": "vision",
+      "method": "manual",
+      "url": "https://github.com/yastrebksv/TrackNet",
+      "dataset_url": "https://drive.google.com/drive/folders/11r0RUaQHX7I3ANkaYG4jOxXK1OYo01Ut",
+      "destination": "data/raw/vision/tracknet",
+      "note": "Dataset link from the unofficial PyTorch implementation. Keep images, Label.csv files, and split metadata. Original research host is inaccessible through the web tool."
+    },
+    {
+      "id": "thetis",
+      "group": "vision",
+      "method": "github",
+      "repo": "THETIS-dataset/dataset",
+      "url": "https://github.com/THETIS-dataset/dataset",
+      "destination": "data/raw/vision/thetis",
+      "note": "Potentially large ZIP; videos plus RGB/depth/mask/skeleton modalities. Preserve citations. A Git LFS pointer is not a downloaded video."
+    },
+    {
+      "id": "racketvision_dataset",
+      "group": "vision",
+      "method": "manual",
+      "url": "https://huggingface.co/datasets/linfeng302/RacketVision",
+      "destination": "data/raw/vision/racketvision",
+      "note": "Use hf download; official repository is OrcustD/RacketVision. Preserve annotations, clips, and splits. Dataset card labels MIT; retain upstream notices."
+    },
+    {
+      "id": "roboflow",
+      "group": "optional",
+      "method": "manual",
+      "url": "https://universe.roboflow.com/search?q=tennis",
+      "destination": "data/raw/vision/roboflow",
+      "note": "Optional enrichment, not one fixed dataset. Choose a version with explicit reuse terms and export images plus annotations."
+    },
+    {
+      "id": "own_footage",
+      "group": "vision",
+      "method": "manual",
+      "url": null,
+      "destination": "data/raw/video/own",
+      "note": "Record 10-20 fixed-camera baseline clips; hand-label 3-5 rallies."
+    },
+    {
+      "id": "model_weights",
+      "group": "vision",
+      "method": "manual",
+      "url": "https://github.com/yastrebksv/TrackNet",
+      "court_weights_url": "https://drive.google.com/file/d/1f-Co64ehgq4uddcQm1aFBDtbnyZhQvgG/view",
+      "tracknet_weights_url": "https://drive.google.com/file/d/1XEYZ4myUN7QT-NeBYJI0xteLsvs-ZAOl/view",
+      "destination": "data/models",
+      "note": "Store in court/ and tracknet/. V4/V5 and YOLO/pose are model alternatives, not additional required datasets. Match weights to implementation and architecture."
+    },
+    {
+      "id": "weather",
+      "group": "optional",
+      "method": "manual",
+      "url": "https://open-meteo.com/en/docs/historical-weather-api",
+      "destination": "data/raw/weather",
+      "note": "Create tournament coordinate/date seeds first, then download historical responses. Not a fixed tennis dataset."
+    },
+    {
+      "id": "elo_reference",
+      "group": "optional",
+      "method": "manual",
+      "url": "https://www.tennisabstract.com/reports/atp_elo_ratings.html",
+      "destination": "data/raw/elo_reference",
+      "note": "Manual sanity check only, as specified in the plan. Not a required historical Elo feed."
+    },
+    {
+      "id": "court_code",
+      "group": "reference",
+      "method": "github",
+      "repo": "yastrebksv/TennisCourtDetector",
+      "url": "https://github.com/yastrebksv/TennisCourtDetector",
+      "destination": "data/reference/TennisCourtDetector"
+    },
+    {
+      "id": "tracknet_code",
+      "group": "reference",
+      "method": "github",
+      "repo": "yastrebksv/TrackNet",
+      "url": "https://github.com/yastrebksv/TrackNet",
+      "destination": "data/reference/TrackNet"
+    },
+    {
+      "id": "tracknet_v4_code",
+      "group": "reference",
+      "method": "github",
+      "repo": "TrackNetV4/TrackNetV4",
+      "url": "https://github.com/TrackNetV4/TrackNetV4",
+      "destination": "data/reference/TrackNetV4"
+    },
+    {
+      "id": "tracknet_v5_code",
+      "group": "reference",
+      "method": "github",
+      "repo": "thaonan/TrackNetV5-SDK",
+      "url": "https://github.com/thaonan/TrackNetV5-SDK",
+      "destination": "data/reference/TrackNetV5"
+    },
+    {
+      "id": "racketvision_code",
+      "group": "reference",
+      "method": "github",
+      "repo": "OrcustD/RacketVision",
+      "url": "https://github.com/OrcustD/RacketVision",
+      "destination": "data/reference/RacketVision"
+    },
+    {
+      "id": "tennis_analysis_code",
+      "group": "reference",
+      "method": "github",
+      "repo": "abdullahtarek/tennis_analysis",
+      "url": "https://github.com/abdullahtarek/tennis_analysis",
+      "destination": "data/reference/tennis_analysis"
+    }
+  ],
+  "papers": [
+    "https://arxiv.org/abs/1907.03698",
+    "https://arxiv.org/abs/2409.14543",
+    "https://arxiv.org/abs/2512.02789",
+    "https://arxiv.org/abs/2511.17045"
+  ]
+}

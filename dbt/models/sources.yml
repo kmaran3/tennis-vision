@@ -1,0 +1,11 @@
+version: 2
+sources:
+  - name: raw
+    schema: raw
+    tables:
+      - name: atp_matches
+      - name: wta_matches
+      - name: atp_players
+      - name: wta_players
+      - name: atp_rankings
+      - name: wta_rankings

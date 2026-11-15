@@ -1,0 +1,41 @@
+name: Verify Baseline
+on: [push, pull_request]
+permissions:
+  contents: read
+concurrency:
+  group: baseline-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  offline:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with: {version: "0.9.8", python-version: "3.11"}
+      - uses: actions/setup-node@v4
+        with: {node-version: "22", cache: npm, cache-dependency-path: frontend/package-lock.json}
+      - run: uv sync --locked
+      - run: uv run pytest -q
+      - run: uv run baseline openapi
+      - run: npm --prefix frontend ci
+      - run: npm --prefix frontend run types
+      - run: git diff --exit-code frontend/src/api.d.ts
+      - run: npm --prefix frontend run build
+  container:
+    needs: offline
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker build --progress=plain -t baseline:verify .
+      - run: docker run -d --name baseline --memory=512m --cpus=0.5 -p 127.0.0.1:8000:8000 -e PORT=8000 baseline:verify
+      - run: python3 scripts/container_smoke.py
+      - name: Measure production image resources
+        run: |
+          docker stats --no-stream --format '{{json .}}' baseline
+          docker exec baseline python -c "import json,pathlib;root=pathlib.Path('/sys/fs/cgroup');print(json.dumps({'memory_current_bytes':(root/'memory.current').read_text().strip(),'memory_peak_bytes':(root/'memory.peak').read_text().strip(),'cpu_stat':(root/'cpu.stat').read_text()}))"
+          docker exec baseline python -c "import json,pathlib;result=[];[(result.append({'pid':p.name,'status':[s for s in (p/'status').read_text().splitlines() if s.startswith(('VmRSS:','VmHWM:'))]})) for p in pathlib.Path('/proc').iterdir() if p.name.isdigit() and (p/'cmdline').exists() and b'baseline.api:app' in (p/'cmdline').read_bytes().split(bytes([0]))];print(json.dumps({'application_processes':result}))"
+      - if: always()
+        run: docker logs baseline || true
+      - if: always()
+        run: docker rm -f baseline || true

@@ -1,0 +1,48 @@
+import {test,expect} from '@playwright/test';
+test('both tours, player profile, matchup, replay and public examples',async({page})=>{
+ const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.goto('/');await expect(page.getByRole('heading',{name:'Explore the archive'})).toBeVisible();
+ await page.getByRole('button',{name:'WTA',exact:true}).click();
+ await page.getByPlaceholder('Search players…').fill('Swiatek');
+ await page.getByRole('button',{name:/Iga Swiatek/}).first().click();
+ await expect(page.getByRole('heading',{name:'Iga Swiatek',exact:true})).toBeVisible();
+ await expect(page.getByRole('heading',{name:'Ranking over time'})).toBeVisible();
+ await page.goto('/matchup?tour=ATP&surface=Clay');
+ await page.getByLabel('Select Player A').selectOption('atp:104745');
+ await page.getByLabel('Select Player B').selectOption('atp:104925');
+ await page.getByLabel('As-of date').fill('2024-06-01');
+ await page.getByRole('button',{name:/Build comparison/}).click();
+ await expect(page.getByRole('heading',{name:'What to watch'})).toBeVisible();
+ await expect(page.getByText('Historical scenario, not a current prediction.',{exact:false})).toBeVisible();
+ await page.goto('/replay?tour=WTA');
+ const select=page.getByRole('combobox',{name:'Select historical match'});
+ await expect(select.locator('option')).not.toHaveCount(1);
+ const value=await select.locator('option').nth(1).getAttribute('value');await select.selectOption(value!);
+ await expect(page.getByText('BEFORE POINT 1',{exact:true})).toBeVisible();
+ await page.getByRole('button',{name:'Next point →'}).click();
+ await expect(page.getByText('BEFORE POINT 2',{exact:true})).toBeVisible();
+ await page.getByRole('slider').focus();await page.keyboard.press('ArrowRight');
+ await expect(page.getByText('BEFORE POINT 3',{exact:true})).toBeVisible();
+ await page.goto('/ask?tour=ATP');await expect(page.getByRole('link',{name:/Sign in with GitHub/})).toBeVisible();
+ await expect(page.getByRole('heading',{name:'Serve and win rates, by surface'})).toBeVisible();
+ await expect(page.getByRole('cell',{name:'Hard',exact:true})).toBeVisible();
+ expect(errors).toEqual([]);
+});
+test('mobile layout, shareable filters, keyboard controls, and empty state',async({page})=>{
+ await page.setViewportSize({width:390,height:844});await page.goto('/explore?tour=WTA&surface=Clay&end=2024-12-31');
+ await expect(page.getByRole('button',{name:'WTA',exact:true})).toHaveAttribute('aria-pressed','true');
+ await expect(page.getByLabel('Surface',{exact:true})).toHaveValue('Clay');
+ await page.getByPlaceholder('Search players…').fill('not-a-real-player-zzzz');
+ await expect(page.getByText('No players found.',{exact:false})).toBeVisible();
+ expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth)).toBe(true);
+ await page.reload();await expect(page.getByLabel('Surface',{exact:true})).toHaveValue('Clay');
+ await page.keyboard.press('Tab');await expect(page.getByRole('link',{name:'Skip to content'})).toBeFocused();
+ await page.screenshot({path:'../artifacts/baseline-mobile.png',fullPage:true});
+});
+test('desktop preview',async({page})=>{
+ await page.setViewportSize({width:1440,height:1000});await page.goto('/explore?tour=ATP&end=2024-12-31');
+ await expect(page.getByRole('heading',{name:'A game worth getting to know.'})).toBeVisible();
+ await expect(page.locator('tbody tr').first()).toBeVisible();
+ await expect(page.locator('tbody tr').first().getByRole('cell').nth(1)).not.toHaveText('—');
+ await page.screenshot({path:'../artifacts/baseline-desktop.png',fullPage:true});
+});

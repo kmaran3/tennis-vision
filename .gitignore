@@ -18,4 +18,16 @@ data/inventory.json
 dbt/target/
 dbt/logs/
 dbt/dbt_packages/
+dbt/.user.yml
 
+
+node_modules/
+frontend/dist/
+artifacts/
+data/releases/
+data/cache/
+.pytest_cache/
+.ruff_cache/
+
+frontend/test-results/
+frontend/playwright-report/

@@ -1,0 +1,8 @@
+{
+  "url": "https://github.com/kmaran3/tennis-vision/releases/download/serving-a7eb168cddb5-a6f54bc24de1/baseline-serving.tar.gz",
+  "sha256": "a6f54bc24de10cdc1e710a2f78e6a5fe68db65bedb35a7d15a6c9d7e2a520833",
+  "bytes": 193371379,
+  "snapshot": "a7eb168cddb5655943bbb3f91ee6d965ab7cec5d3db3a1f1a6352f14e3430c95",
+  "metric_version": "metrics-v2",
+  "tag": "serving-a7eb168cddb5-a6f54bc24de1"
+}

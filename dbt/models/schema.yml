@@ -1,0 +1,23 @@
+version: 2
+models:
+  - name: matches
+    columns:
+      - name: match_id
+        data_tests: [unique, not_null]
+  - name: players
+    columns:
+      - name: player_id
+        data_tests: [unique, not_null]
+  - name: player_matches
+    columns:
+      - name: player_id
+        data_tests:
+          - relationships:
+              arguments: {to: "ref('players')", field: player_id}
+  - name: time_spine
+    time_spine:
+      standard_granularity_column: date_day
+    columns:
+      - name: date_day
+        granularity: day
+        data_tests: [unique, not_null]

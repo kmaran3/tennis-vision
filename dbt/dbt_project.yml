@@ -1,0 +1,9 @@
+name: baseline
+version: 1.0.0
+config-version: 2
+profile: baseline
+model-paths: [models]
+test-paths: [tests]
+models:
+  baseline:
+    +materialized: table

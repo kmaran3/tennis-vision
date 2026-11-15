@@ -16,9 +16,9 @@ Update the Baseline GitHub OAuth app:
 
 ## Deployment work still required
 
-The existing failed Railway deployment points at `e7908e9`, the acquisition-only repository commit. The application implementation remains local, and the serving database is intentionally Git-ignored. A GitHub connection alone cannot supply the current serving artifact.
+The existing failed Railway deployment points at `e7908e9`, the acquisition-only repository commit. The application implementation is pushed to `baseline-release`; the serving database remains intentionally outside Git. `deployment/serving-release.json` pins a public GitHub release asset by exact URL, SHA-256, byte size, source snapshot and metric version. The Docker build downloads and verifies it, including every extracted file checksum, before starting the app. The asset excludes account/credential/operating reports and preserves original data notices.
 
-The prepared local bundle at `artifacts/deploy/` contains application sources, the Dockerfile and a materialized checksummed serving release. Regenerate it after source/artifact changes:
+The prepared local bundle at `artifacts/deploy/` contains application sources, the Dockerfile and the same pinned download manifest. Regenerate it after source/artifact changes:
 
 ```sh
 uv run python scripts/export_deploy.py
@@ -32,7 +32,7 @@ railway up artifacts/deploy --path-as-root --no-gitignore \
   --environment production --service tennis-vision
 ```
 
-This command starts a real deployment and must not run before the no-additional-charge condition is satisfied. `--no-gitignore` is appropriate only for this clean exported context, which excludes credentials and raw sources. Repository-triggered deployments still need a deliberate serving-artifact delivery mechanism; they cannot build from the current GitHub tree.
+This command starts a real deployment and must not run before the no-additional-charge condition is satisfied. `--no-gitignore` is appropriate only for this clean exported context, which excludes credentials and raw sources. GitHub-triggered deployments use the same pinned artifact download. Activating the release on the connected `main` branch will deploy it, so that push remains subject to the hosting budget gate.
 
 Authenticated analyst quotas require durable storage mounted at `/app/state`; `BASELINE_QUOTA_DB` is staged as `/app/state/analyst-quota.sqlite`. Volume cost belongs in the hosting calculation. No volume was created.
 

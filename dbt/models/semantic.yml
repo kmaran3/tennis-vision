@@ -1,0 +1,455 @@
+semantic_models:
+- name: player_matches
+  model: ref('player_matches')
+  defaults:
+    agg_time_dimension: observed_date
+  entities:
+  - name: player_match
+    type: primary
+    expr: match_id || ':' || player_id
+  - name: player
+    type: foreign
+    expr: player_id
+  dimensions:
+  - name: observed_date
+    type: time
+    type_params:
+      time_granularity: day
+  - name: tour
+    type: categorical
+  - name: surface
+    type: categorical
+  - name: season
+    type: categorical
+  - name: level
+    type: categorical
+  measures:
+  - name: match_win_rate_numerator
+    agg: sum
+    expr: CASE WHEN (won) IS NOT NULL AND (1) IS NOT NULL AND (won)>=0 AND (1)>=0
+      AND (won)<=(1) THEN (won) END
+  - name: match_win_rate_denominator
+    agg: sum
+    expr: CASE WHEN (won) IS NOT NULL AND (1) IS NOT NULL AND (won)>=0 AND (1)>=0
+      AND (won)<=(1) THEN (1) END
+  - name: first_serve_in_numerator
+    agg: sum
+    expr: CASE WHEN (first_in) IS NOT NULL AND (service_points) IS NOT NULL AND (first_in)>=0
+      AND (service_points)>=0 AND (first_in)<=(service_points) THEN (first_in) END
+  - name: first_serve_in_denominator
+    agg: sum
+    expr: CASE WHEN (first_in) IS NOT NULL AND (service_points) IS NOT NULL AND (first_in)>=0
+      AND (service_points)>=0 AND (first_in)<=(service_points) THEN (service_points)
+      END
+  - name: first_serve_won_numerator
+    agg: sum
+    expr: CASE WHEN (first_won) IS NOT NULL AND (first_in) IS NOT NULL AND (first_won)>=0
+      AND (first_in)>=0 AND (first_won)<=(first_in) THEN (first_won) END
+  - name: first_serve_won_denominator
+    agg: sum
+    expr: CASE WHEN (first_won) IS NOT NULL AND (first_in) IS NOT NULL AND (first_won)>=0
+      AND (first_in)>=0 AND (first_won)<=(first_in) THEN (first_in) END
+  - name: second_serve_won_numerator
+    agg: sum
+    expr: CASE WHEN (second_won) IS NOT NULL AND (service_points-first_in) IS NOT
+      NULL AND (second_won)>=0 AND (service_points-first_in)>=0 AND (second_won)<=(service_points-first_in)
+      THEN (second_won) END
+  - name: second_serve_won_denominator
+    agg: sum
+    expr: CASE WHEN (second_won) IS NOT NULL AND (service_points-first_in) IS NOT
+      NULL AND (second_won)>=0 AND (service_points-first_in)>=0 AND (second_won)<=(service_points-first_in)
+      THEN (service_points-first_in) END
+  - name: return_points_won_numerator
+    agg: sum
+    expr: CASE WHEN (opp_service_points-opp_first_won-opp_second_won) IS NOT NULL
+      AND (opp_service_points) IS NOT NULL AND (opp_service_points-opp_first_won-opp_second_won)>=0
+      AND (opp_service_points)>=0 AND (opp_service_points-opp_first_won-opp_second_won)<=(opp_service_points)
+      THEN (opp_service_points-opp_first_won-opp_second_won) END
+  - name: return_points_won_denominator
+    agg: sum
+    expr: CASE WHEN (opp_service_points-opp_first_won-opp_second_won) IS NOT NULL
+      AND (opp_service_points) IS NOT NULL AND (opp_service_points-opp_first_won-opp_second_won)>=0
+      AND (opp_service_points)>=0 AND (opp_service_points-opp_first_won-opp_second_won)<=(opp_service_points)
+      THEN (opp_service_points) END
+  - name: break_point_save_numerator
+    agg: sum
+    expr: CASE WHEN (bp_saved) IS NOT NULL AND (bp_faced) IS NOT NULL AND (bp_saved)>=0
+      AND (bp_faced)>=0 AND (bp_saved)<=(bp_faced) THEN (bp_saved) END
+  - name: break_point_save_denominator
+    agg: sum
+    expr: CASE WHEN (bp_saved) IS NOT NULL AND (bp_faced) IS NOT NULL AND (bp_saved)>=0
+      AND (bp_faced)>=0 AND (bp_saved)<=(bp_faced) THEN (bp_faced) END
+  - name: break_point_conversion_numerator
+    agg: sum
+    expr: CASE WHEN (opp_bp_faced-opp_bp_saved) IS NOT NULL AND (opp_bp_faced) IS
+      NOT NULL AND (opp_bp_faced-opp_bp_saved)>=0 AND (opp_bp_faced)>=0 AND (opp_bp_faced-opp_bp_saved)<=(opp_bp_faced)
+      THEN (opp_bp_faced-opp_bp_saved) END
+  - name: break_point_conversion_denominator
+    agg: sum
+    expr: CASE WHEN (opp_bp_faced-opp_bp_saved) IS NOT NULL AND (opp_bp_faced) IS
+      NOT NULL AND (opp_bp_faced-opp_bp_saved)>=0 AND (opp_bp_faced)>=0 AND (opp_bp_faced-opp_bp_saved)<=(opp_bp_faced)
+      THEN (opp_bp_faced) END
+  - name: aces_per_service_point_numerator
+    agg: sum
+    expr: CASE WHEN (aces) IS NOT NULL AND (service_points) IS NOT NULL AND (aces)>=0
+      AND (service_points)>=0 AND (aces)<=(service_points) THEN (aces) END
+  - name: aces_per_service_point_denominator
+    agg: sum
+    expr: CASE WHEN (aces) IS NOT NULL AND (service_points) IS NOT NULL AND (aces)>=0
+      AND (service_points)>=0 AND (aces)<=(service_points) THEN (service_points) END
+  - name: double_faults_per_service_point_numerator
+    agg: sum
+    expr: CASE WHEN (double_faults) IS NOT NULL AND (service_points) IS NOT NULL AND
+      (double_faults)>=0 AND (service_points)>=0 AND (double_faults)<=(service_points)
+      THEN (double_faults) END
+  - name: double_faults_per_service_point_denominator
+    agg: sum
+    expr: CASE WHEN (double_faults) IS NOT NULL AND (service_points) IS NOT NULL AND
+      (double_faults)>=0 AND (service_points)>=0 AND (double_faults)<=(service_points)
+      THEN (service_points) END
+  - name: average_rally_length_numerator
+    agg: sum
+    expr: CASE WHEN (rally_shots) IS NOT NULL AND (rally_points) IS NOT NULL AND (rally_shots)>=0
+      AND (rally_points)>=0 THEN (rally_shots) END
+  - name: average_rally_length_denominator
+    agg: sum
+    expr: CASE WHEN (rally_shots) IS NOT NULL AND (rally_points) IS NOT NULL AND (rally_shots)>=0
+      AND (rally_points)>=0 THEN (rally_points) END
+  - name: serve_wide_share_numerator
+    agg: sum
+    expr: CASE WHEN (serve_wide) IS NOT NULL AND (charted_serves) IS NOT NULL AND
+      (serve_wide)>=0 AND (charted_serves)>=0 AND (serve_wide)<=(charted_serves) THEN
+      (serve_wide) END
+  - name: serve_wide_share_denominator
+    agg: sum
+    expr: CASE WHEN (serve_wide) IS NOT NULL AND (charted_serves) IS NOT NULL AND
+      (serve_wide)>=0 AND (charted_serves)>=0 AND (serve_wide)<=(charted_serves) THEN
+      (charted_serves) END
+  - name: serve_body_share_numerator
+    agg: sum
+    expr: CASE WHEN (serve_body) IS NOT NULL AND (charted_serves) IS NOT NULL AND
+      (serve_body)>=0 AND (charted_serves)>=0 AND (serve_body)<=(charted_serves) THEN
+      (serve_body) END
+  - name: serve_body_share_denominator
+    agg: sum
+    expr: CASE WHEN (serve_body) IS NOT NULL AND (charted_serves) IS NOT NULL AND
+      (serve_body)>=0 AND (charted_serves)>=0 AND (serve_body)<=(charted_serves) THEN
+      (charted_serves) END
+  - name: serve_t_share_numerator
+    agg: sum
+    expr: CASE WHEN (serve_t) IS NOT NULL AND (charted_serves) IS NOT NULL AND (serve_t)>=0
+      AND (charted_serves)>=0 AND (serve_t)<=(charted_serves) THEN (serve_t) END
+  - name: serve_t_share_denominator
+    agg: sum
+    expr: CASE WHEN (serve_t) IS NOT NULL AND (charted_serves) IS NOT NULL AND (serve_t)>=0
+      AND (charted_serves)>=0 AND (serve_t)<=(charted_serves) THEN (charted_serves)
+      END
+  - name: charted_match_coverage_numerator
+    agg: sum
+    expr: CASE WHEN (charted_match) IS NOT NULL AND (1) IS NOT NULL AND (charted_match)>=0
+      AND (1)>=0 AND (charted_match)<=(1) THEN (charted_match) END
+  - name: charted_match_coverage_denominator
+    agg: sum
+    expr: CASE WHEN (charted_match) IS NOT NULL AND (1) IS NOT NULL AND (charted_match)>=0
+      AND (1)>=0 AND (charted_match)<=(1) THEN (1) END
+  - name: odds_match_coverage_numerator
+    agg: sum
+    expr: CASE WHEN (odds_match) IS NOT NULL AND (1) IS NOT NULL AND (odds_match)>=0
+      AND (1)>=0 AND (odds_match)<=(1) THEN (odds_match) END
+  - name: odds_match_coverage_denominator
+    agg: sum
+    expr: CASE WHEN (odds_match) IS NOT NULL AND (1) IS NOT NULL AND (odds_match)>=0
+      AND (1)>=0 AND (odds_match)<=(1) THEN (1) END
+  - name: venue_coverage_numerator
+    agg: sum
+    expr: CASE WHEN (venue_verified) IS NOT NULL AND (1) IS NOT NULL AND (venue_verified)>=0
+      AND (1)>=0 AND (venue_verified)<=(1) THEN (venue_verified) END
+  - name: venue_coverage_denominator
+    agg: sum
+    expr: CASE WHEN (venue_verified) IS NOT NULL AND (1) IS NOT NULL AND (venue_verified)>=0
+      AND (1)>=0 AND (venue_verified)<=(1) THEN (1) END
+  - name: weather_coverage_numerator
+    agg: sum
+    expr: CASE WHEN (weather_available) IS NOT NULL AND (1) IS NOT NULL AND (weather_available)>=0
+      AND (1)>=0 AND (weather_available)<=(1) THEN (weather_available) END
+  - name: weather_coverage_denominator
+    agg: sum
+    expr: CASE WHEN (weather_available) IS NOT NULL AND (1) IS NOT NULL AND (weather_available)>=0
+      AND (1)>=0 AND (weather_available)<=(1) THEN (1) END
+metrics:
+- name: match_win_rate_numerator
+  label: match_win_rate_numerator
+  type: simple
+  type_params:
+    measure: match_win_rate_numerator
+- name: match_win_rate_denominator
+  label: match_win_rate_denominator
+  type: simple
+  type_params:
+    measure: match_win_rate_denominator
+- name: match_win_rate
+  label: Completed-match wins / completed matches
+  type: ratio
+  type_params:
+    numerator: match_win_rate_numerator
+    denominator: match_win_rate_denominator
+- name: first_serve_in_numerator
+  label: first_serve_in_numerator
+  type: simple
+  type_params:
+    measure: first_serve_in_numerator
+- name: first_serve_in_denominator
+  label: first_serve_in_denominator
+  type: simple
+  type_params:
+    measure: first_serve_in_denominator
+- name: first_serve_in
+  label: First serves in / service points
+  type: ratio
+  type_params:
+    numerator: first_serve_in_numerator
+    denominator: first_serve_in_denominator
+- name: first_serve_won_numerator
+  label: first_serve_won_numerator
+  type: simple
+  type_params:
+    measure: first_serve_won_numerator
+- name: first_serve_won_denominator
+  label: first_serve_won_denominator
+  type: simple
+  type_params:
+    measure: first_serve_won_denominator
+- name: first_serve_won
+  label: First serve points won / first serves in
+  type: ratio
+  type_params:
+    numerator: first_serve_won_numerator
+    denominator: first_serve_won_denominator
+- name: second_serve_won_numerator
+  label: second_serve_won_numerator
+  type: simple
+  type_params:
+    measure: second_serve_won_numerator
+- name: second_serve_won_denominator
+  label: second_serve_won_denominator
+  type: simple
+  type_params:
+    measure: second_serve_won_denominator
+- name: second_serve_won
+  label: Second serve points won / second serve opportunities, including double faults
+  type: ratio
+  type_params:
+    numerator: second_serve_won_numerator
+    denominator: second_serve_won_denominator
+- name: return_points_won_numerator
+  label: return_points_won_numerator
+  type: simple
+  type_params:
+    measure: return_points_won_numerator
+- name: return_points_won_denominator
+  label: return_points_won_denominator
+  type: simple
+  type_params:
+    measure: return_points_won_denominator
+- name: return_points_won
+  label: Return points won / return points played
+  type: ratio
+  type_params:
+    numerator: return_points_won_numerator
+    denominator: return_points_won_denominator
+- name: break_point_save_numerator
+  label: break_point_save_numerator
+  type: simple
+  type_params:
+    measure: break_point_save_numerator
+- name: break_point_save_denominator
+  label: break_point_save_denominator
+  type: simple
+  type_params:
+    measure: break_point_save_denominator
+- name: break_point_save
+  label: Break points saved / break points faced
+  type: ratio
+  type_params:
+    numerator: break_point_save_numerator
+    denominator: break_point_save_denominator
+- name: break_point_conversion_numerator
+  label: break_point_conversion_numerator
+  type: simple
+  type_params:
+    measure: break_point_conversion_numerator
+- name: break_point_conversion_denominator
+  label: break_point_conversion_denominator
+  type: simple
+  type_params:
+    measure: break_point_conversion_denominator
+- name: break_point_conversion
+  label: Break points converted / opponent break points faced
+  type: ratio
+  type_params:
+    numerator: break_point_conversion_numerator
+    denominator: break_point_conversion_denominator
+- name: aces_per_service_point_numerator
+  label: aces_per_service_point_numerator
+  type: simple
+  type_params:
+    measure: aces_per_service_point_numerator
+- name: aces_per_service_point_denominator
+  label: aces_per_service_point_denominator
+  type: simple
+  type_params:
+    measure: aces_per_service_point_denominator
+- name: aces_per_service_point
+  label: Aces / service points
+  type: ratio
+  type_params:
+    numerator: aces_per_service_point_numerator
+    denominator: aces_per_service_point_denominator
+- name: double_faults_per_service_point_numerator
+  label: double_faults_per_service_point_numerator
+  type: simple
+  type_params:
+    measure: double_faults_per_service_point_numerator
+- name: double_faults_per_service_point_denominator
+  label: double_faults_per_service_point_denominator
+  type: simple
+  type_params:
+    measure: double_faults_per_service_point_denominator
+- name: double_faults_per_service_point
+  label: Double faults / service points
+  type: ratio
+  type_params:
+    numerator: double_faults_per_service_point_numerator
+    denominator: double_faults_per_service_point_denominator
+- name: average_rally_length_numerator
+  label: average_rally_length_numerator
+  type: simple
+  type_params:
+    measure: average_rally_length_numerator
+- name: average_rally_length_denominator
+  label: average_rally_length_denominator
+  type: simple
+  type_params:
+    measure: average_rally_length_denominator
+- name: average_rally_length
+  label: Charted rally shots including serve, excluding terminal errors / parsed charted
+    points
+  type: ratio
+  type_params:
+    numerator: average_rally_length_numerator
+    denominator: average_rally_length_denominator
+- name: serve_wide_share_numerator
+  label: serve_wide_share_numerator
+  type: simple
+  type_params:
+    measure: serve_wide_share_numerator
+- name: serve_wide_share_denominator
+  label: serve_wide_share_denominator
+  type: simple
+  type_params:
+    measure: serve_wide_share_denominator
+- name: serve_wide_share
+  label: Wide final serve attempts per point / final attempts with known direction;
+    second serve when played
+  type: ratio
+  type_params:
+    numerator: serve_wide_share_numerator
+    denominator: serve_wide_share_denominator
+- name: serve_body_share_numerator
+  label: serve_body_share_numerator
+  type: simple
+  type_params:
+    measure: serve_body_share_numerator
+- name: serve_body_share_denominator
+  label: serve_body_share_denominator
+  type: simple
+  type_params:
+    measure: serve_body_share_denominator
+- name: serve_body_share
+  label: Body final serve attempts per point / final attempts with known direction;
+    second serve when played
+  type: ratio
+  type_params:
+    numerator: serve_body_share_numerator
+    denominator: serve_body_share_denominator
+- name: serve_t_share_numerator
+  label: serve_t_share_numerator
+  type: simple
+  type_params:
+    measure: serve_t_share_numerator
+- name: serve_t_share_denominator
+  label: serve_t_share_denominator
+  type: simple
+  type_params:
+    measure: serve_t_share_denominator
+- name: serve_t_share
+  label: T final serve attempts per point / final attempts with known direction; second
+    serve when played
+  type: ratio
+  type_params:
+    numerator: serve_t_share_numerator
+    denominator: serve_t_share_denominator
+- name: charted_match_coverage_numerator
+  label: charted_match_coverage_numerator
+  type: simple
+  type_params:
+    measure: charted_match_coverage_numerator
+- name: charted_match_coverage_denominator
+  label: charted_match_coverage_denominator
+  type: simple
+  type_params:
+    measure: charted_match_coverage_denominator
+- name: charted_match_coverage
+  label: Matches with a verified charting bridge / completed matches
+  type: ratio
+  type_params:
+    numerator: charted_match_coverage_numerator
+    denominator: charted_match_coverage_denominator
+- name: odds_match_coverage_numerator
+  label: odds_match_coverage_numerator
+  type: simple
+  type_params:
+    measure: odds_match_coverage_numerator
+- name: odds_match_coverage_denominator
+  label: odds_match_coverage_denominator
+  type: simple
+  type_params:
+    measure: odds_match_coverage_denominator
+- name: odds_match_coverage
+  label: Matches with uniquely matched Valuebetennis records / completed matches
+  type: ratio
+  type_params:
+    numerator: odds_match_coverage_numerator
+    denominator: odds_match_coverage_denominator
+- name: venue_coverage_numerator
+  label: venue_coverage_numerator
+  type: simple
+  type_params:
+    measure: venue_coverage_numerator
+- name: venue_coverage_denominator
+  label: venue_coverage_denominator
+  type: simple
+  type_params:
+    measure: venue_coverage_denominator
+- name: venue_coverage
+  label: Matches with a verified venue assignment / completed matches
+  type: ratio
+  type_params:
+    numerator: venue_coverage_numerator
+    denominator: venue_coverage_denominator
+- name: weather_coverage_numerator
+  label: weather_coverage_numerator
+  type: simple
+  type_params:
+    measure: weather_coverage_numerator
+- name: weather_coverage_denominator
+  label: weather_coverage_denominator
+  type: simple
+  type_params:
+    measure: weather_coverage_denominator
+- name: weather_coverage
+  label: Matches with cached verified-venue event-period weather / completed matches
+  type: ratio
+  type_params:
+    numerator: weather_coverage_numerator
+    denominator: weather_coverage_denominator

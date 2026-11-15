@@ -1,1 +1,10 @@
-{}
+{
+  "sackmann_archive": {
+    "repo": "Aneeshers/tennis-sackmann-archive",
+    "revision": "83733587353df8a41f2fd4f516147d5aa83f5a8d"
+  },
+  "match_charting": {
+    "repo": "JeffSackmann/tennis_MatchChartingProject",
+    "revision": "1813a1309b7ed7ebf1c7e884b32bf675d00e4edf"
+  }
+}

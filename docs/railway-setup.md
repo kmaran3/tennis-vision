@@ -37,3 +37,9 @@ This command starts a real deployment and must not run before the no-additional-
 Authenticated analyst quotas require durable storage mounted at `/app/state`; `BASELINE_QUOTA_DB` is staged as `/app/state/analyst-quota.sqlite`. Volume cost belongs in the hosting calculation. No volume was created.
 
 The generated domain is reserved; it does not indicate a healthy application. Final checks require `/health/ready`, public browsing, actual OAuth consent, provider/quota failures and rollback at the host. Live analyst evaluation is currently paused on Google's HTTP 503 high-demand responses.
+
+## Hosting budget constraint
+
+The user's budget is the existing Hobby plan's $5 included monthly resource usage, shared with other projects. At inspection the workspace had approximately $1.36 of current-cycle usage and no compute hard limit. Railway's [documented native compute hard limit starts at $10](https://docs.railway.com/cli/usage), which exceeds this budget and applies across the workspace. No shared limit was changed.
+
+The prepared service configuration enables auto-sleep, one replica, 0.5 CPU and 512 MiB memory. Its production image passed CI within those resource limits. These controls and the lighter inference imports reduce expected usage; they do not enforce a $5 maximum bill. The release branch is pushed and validated, but the connected `main` branch remains unchanged until this constraint is resolved. Do not promise a $5 spending guarantee from a memory estimate.

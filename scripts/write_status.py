@@ -68,6 +68,16 @@ def main():
               "The current failed deployment uses the acquisition-only GitHub commit; application code and the serving artifact remain local. Verify allowance, durable quota storage cost, artifact delivery and container runtime before deploying. "
               "Evidence: `artifacts/railway-setup.json`; instructions: `docs/railway-setup.md`.")
         lines=[note if line.startswith('4. ') else line for line in lines]
+    push_path=ARTIFACTS/'push-verification.json'
+    if push_path.exists():
+        push=json.loads(push_path.read_text())
+        note=(f"4. The application is pushed to `{push['branch']}`, and its pinned serving snapshot is published as a checksummed GitHub prerelease asset. GitHub offline and production-container checks passed: {push['ci_run_url']}. "
+              "Railway has a domain and staged runtime variables but has not been activated. The requested $5 included-usage ceiling cannot be enforced by Railway's native compute limit, whose documented minimum is $10. Shared limits were not changed. "
+              "Resource reduction and auto-sleep lower expected usage but do not guarantee a maximum bill. See `artifacts/railway-budget-decision.json` and [Railway limit rules](https://docs.railway.com/cli/usage).")
+        lines=[note if line.startswith('4. ') else line for line in lines]
+        note=("5. The production Docker image built and passed browsing, metric, historical replay and matchup/symmetry checks on GitHub under a 512 MiB / 0.5 CPU container limit. Local Docker remains unavailable; no local container result is claimed. "
+              "A production activation still requires a resolved hosting budget, durable quota storage, actual host checks and GitHub browser consent. Live analyst evaluation remains separately gated on provider availability.")
+        lines=[note if line.startswith('5. ') else line for line in lines]
     lines=[line.replace('38 offline tests',f'{test_count} offline tests') for line in lines]
     (ROOT/"docs/implementation-status.md").write_text("\n".join(lines))
     readme=ROOT/"README.md";text=readme.read_text();marker="\n## Measured local build\n"

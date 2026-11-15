@@ -1,6 +1,9 @@
 """Versioned API and one-service frontend serving."""
 from __future__ import annotations
 import os
+import asyncio
+import json
+from contextlib import suppress
 import threading
 import httpx
 import duckdb
@@ -8,11 +11,12 @@ from datetime import date
 from pathlib import Path
 from typing import Any, Literal
 from fastapi import FastAPI, Depends, HTTPException, Request, Query
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi.responses import FileResponse, JSONResponse, StreamingResponse
+from starlette.background import BackgroundTask
 from fastapi.exceptions import RequestValidationError
 from fastapi.staticfiles import StaticFiles
 from fastapi.encoders import jsonable_encoder
-from pydantic import BaseModel, Field, ConfigDict
+from pydantic import BaseModel, Field, ConfigDict, model_validator
 from .config import serving_path, connect, records, ROOT, METRIC_VERSION
 from .metrics import MetricQuery, query_metrics, METRICS, ASOF_METRICS
 from . import services
@@ -29,9 +33,29 @@ class AnalyticalResponse(BaseModel):
     warnings:list[str]=Field(default_factory=list)
     filters:dict=Field(default_factory=dict)
 
+class ChatMessage(BaseModel):
+    model_config=ConfigDict(extra="forbid")
+    role:Literal["user","assistant"]
+    content:str=Field(min_length=1,max_length=8000)
+
 class AnalystRequest(BaseModel):
     model_config=ConfigDict(extra="forbid")
     question:str=Field(min_length=1,max_length=4000)
+    history:list[ChatMessage]=Field(default_factory=list,max_length=10)
+    tour:Literal["ATP","WTA"]="ATP"
+    surface:Literal["Hard","Clay","Grass","Carpet"]|None=None
+    end:date|None=None
+
+    @model_validator(mode="after")
+    def bounded_history(self):
+        if not self.question.strip():raise ValueError("Enter a tennis question.")
+        if sum(len(m.content) for m in self.history)>16000:raise ValueError("Conversation context is too long. Start a new chat.")
+        if any(m.role!=("user" if i%2==0 else "assistant") for i,m in enumerate(self.history)) or len(self.history)%2:
+            raise ValueError("History must contain completed user/assistant pairs.")
+        return self
+
+def analyst_options(body):
+    return dict(history=[m.model_dump() for m in body.history],context={"tour":body.tour,"surface":body.surface,"end":str(body.end) if body.end else None})
 
 
 def database():
@@ -118,10 +142,51 @@ def replay(match_id:str,con=Depends(database)):
 async def analyst(body:AnalystRequest,request:Request):
     login=user(request);check_origin(request)
     from .analyst import run_analyst
-    with analyst_slot(login):result=await run_analyst(body.question)
+    with analyst_slot(login):result=await run_analyst(body.question,**analyst_options(body))
     con=connect(serving_path(),read_only=True)
     try:return envelope(con,result)
     finally:con.close()
+
+@app.post("/api/v1/analyst/stream",response_class=StreamingResponse,responses={200:{"content":{"text/event-stream":{}},"description":"SSE status, delta, reset, done (AnalyticalResponse), or error events."}})
+async def analyst_stream(body:AnalystRequest,request:Request):
+    login=user(request);check_origin(request)
+    from .analyst import run_analyst
+    # Authentication, origin and quota errors remain ordinary HTTP errors before headers.
+    slot=analyst_slot(login);slot.__enter__()
+    released=False
+    async def release():
+        nonlocal released
+        if not released:
+            released=True;slot.__exit__(None,None,None)
+    async def events():
+        queue=asyncio.Queue(maxsize=64)
+        async def emit(event,data):await queue.put((event,data))
+        async def run():
+            try:
+                result=await run_analyst(body.question,**analyst_options(body),on_event=emit)
+                con=connect(serving_path(),read_only=True)
+                try:result=jsonable_encoder(envelope(con,result,filters=analyst_options(body)["context"]))
+                finally:con.close()
+                await emit("done",result)
+            except (TimeoutError,httpx.TimeoutException):
+                await emit("error",{"code":"provider_timeout","message":"The AI took too long to respond. Please retry or ask a shorter tennis question."})
+            except HTTPException as error:await emit("error",error.detail)
+            except Exception:
+                await emit("error",{"code":"provider_unavailable","message":"The tennis analyst could not finish this response. Please try again."})
+        task=asyncio.create_task(run())
+        try:
+            yield 'event: status\ndata: {"message":"Connecting to Baseline…"}\n\n'
+            while True:
+                try:event,data=await asyncio.wait_for(queue.get(),timeout=4)
+                except TimeoutError:
+                    yield ': keep-alive\n\n';continue
+                yield f'event: {event}\ndata: {json.dumps(data,default=str)}\n\n'
+                if event in ("done","error"):break
+        finally:
+            task.cancel()
+            with suppress(asyncio.CancelledError):await task
+            await release()
+    return StreamingResponse(events(),media_type="text/event-stream",headers={"Cache-Control":"no-store","X-Accel-Buffering":"no"},background=BackgroundTask(release))
 
 @app.get("/health/ready")
 def ready():

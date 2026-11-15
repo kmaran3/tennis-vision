@@ -198,7 +198,7 @@ def test_provider_timeout_is_a_clear_error_and_does_not_block_browsing(monkeypat
     monkeypatch.setenv('BASELINE_SESSION_SECRET','x'*48)
     monkeypatch.setenv('GITHUB_ALLOWED_USERS','owner')
     monkeypatch.setenv('BASELINE_QUOTA_DB',str(tmp_path/'quota.sqlite'))
-    async def timeout(question):raise TimeoutError()
+    async def timeout(question,**kwargs):raise TimeoutError()
     monkeypatch.setattr(analyst_module,'run_analyst',timeout)
     client=TestClient(app);client.cookies.set('baseline_session',serializer('session').dumps({'login':'owner'}))
     response=client.post('/api/v1/analyst',json={'question':'hello'},headers={'origin':'http://localhost:8000'})

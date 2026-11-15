@@ -28,7 +28,7 @@ async def test_tool_round_trip_preserves_ids_signatures_and_budget(monkeypatch):
     monkeypatch.setattr(analyst.httpx,'AsyncClient',lambda **kwargs:client(transport=httpx.MockTransport(respond),**kwargs))
     result=await analyst.run_analyst('List supported metrics')
     assert result['tool_calls']==5 and len(result['evidence'])==5
-    assert len(requests)==2 and 'tools' not in requests[1]
+    assert len(requests)==2 and requests[1]['toolConfig']['functionCallingConfig']['mode']=='NONE'
     assert requests[1]['contents'][1]['parts']==calls
     replies=requests[1]['contents'][2]['parts']
     assert [r['functionResponse']['id'] for r in replies]==[f'call-{i}' for i in range(6)]

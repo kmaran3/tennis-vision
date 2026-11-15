@@ -8,16 +8,19 @@ test('both tours, player profile, matchup, replay and public examples',async({pa
  await expect(page.getByRole('heading',{name:'Iga Swiatek',exact:true})).toBeVisible();
  await expect(page.getByRole('heading',{name:'Ranking over time'})).toBeVisible();
  await page.goto('/matchup?tour=ATP&surface=Clay');
- await page.getByLabel('Select Player A').selectOption('atp:104745');
- await page.getByLabel('Select Player B').selectOption('atp:104925');
+ await page.getByRole('combobox',{name:'Select Player A'}).click();
+ await page.getByRole('option',{name:/Rafael Nadal/}).click();
+ await page.getByRole('combobox',{name:'Select Player B'}).click();
+ await page.getByRole('option',{name:/Novak Djokovic/}).click();
  await page.getByLabel('As-of date').fill('2024-06-01');
  await page.getByRole('button',{name:/Build comparison/}).click();
  await expect(page.getByRole('heading',{name:'What to watch'})).toBeVisible();
  await expect(page.getByText('Historical scenario, not a current prediction.',{exact:false})).toBeVisible();
  await page.goto('/replay?tour=WTA');
  const select=page.getByRole('combobox',{name:'Select historical match'});
- await expect(select.locator('option')).not.toHaveCount(1);
- const value=await select.locator('option').nth(1).getAttribute('value');await select.selectOption(value!);
+ await select.click();
+ await expect(page.getByRole('option')).not.toHaveCount(1);
+ await page.getByRole('option').nth(1).click();
  await expect(page.getByText('BEFORE POINT 1',{exact:true})).toBeVisible();
  await page.getByRole('button',{name:'Next point →'}).click();
  await expect(page.getByText('BEFORE POINT 2',{exact:true})).toBeVisible();
@@ -31,11 +34,11 @@ test('both tours, player profile, matchup, replay and public examples',async({pa
 test('mobile layout, shareable filters, keyboard controls, and empty state',async({page})=>{
  await page.setViewportSize({width:390,height:844});await page.goto('/explore?tour=WTA&surface=Clay&end=2024-12-31');
  await expect(page.getByRole('button',{name:'WTA',exact:true})).toHaveAttribute('aria-pressed','true');
- await expect(page.getByLabel('Surface',{exact:true})).toHaveValue('Clay');
+ await expect(page.getByRole('combobox',{name:'Surface',exact:true})).toHaveText('Clay⌄');
  await page.getByPlaceholder('Search players…').fill('not-a-real-player-zzzz');
  await expect(page.getByText('No players found.',{exact:false})).toBeVisible();
  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth)).toBe(true);
- await page.reload();await expect(page.getByLabel('Surface',{exact:true})).toHaveValue('Clay');
+ await page.reload();await expect(page.getByRole('combobox',{name:'Surface',exact:true})).toHaveText('Clay⌄');
  await page.keyboard.press('Tab');await expect(page.getByRole('link',{name:'Skip to content'})).toBeFocused();
  await page.screenshot({path:'../artifacts/baseline-mobile.png',fullPage:true});
 });

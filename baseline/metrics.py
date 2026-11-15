@@ -96,4 +96,4 @@ def query_metrics(con, q: MetricQuery):
     if q.group_by:
         sql += " GROUP BY "+", ".join(dict.fromkeys(q.group_by))+" ORDER BY sample_matches DESC, "+", ".join(dict.fromkeys(q.group_by))
     sql += " LIMIT ?"; params.append(q.limit)
-    return dict(rows=records(con, sql, params), filters={**q.model_dump(mode="json"), "start":str(start), "end":str(end)}, cutoff=str(cutoff), warnings=["Tournament dates are approximate; latest season is incomplete."])
+    return dict(sample_unit="player-match rows: a match contributes two rows when both players are included; sample_matches and coverage_matches count these rows",rows=records(con, sql, params), filters={**q.model_dump(mode="json"), "start":str(start), "end":str(end)}, cutoff=str(cutoff), warnings=["Tournament dates are approximate; latest season is incomplete."])

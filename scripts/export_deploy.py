@@ -11,7 +11,8 @@ def main():
     target=ARTIFACTS/"deploy"
     with tempfile.TemporaryDirectory(dir=ARTIFACTS) as temp:
         stage=Path(temp)/"context";stage.mkdir()
-        for name in ("Dockerfile",".dockerignore","pyproject.toml","uv.lock","railway.toml"):shutil.copy2(ROOT/name,stage/name)
+        for name in ("Dockerfile",".dockerignore","pyproject.toml","uv.lock","package.json","package-lock.json"):shutil.copy2(ROOT/name,stage/name)
+        (stage/'.railway').mkdir();shutil.copy2(ROOT/'.railway/railway.ts',stage/'.railway/railway.ts')
         shutil.copytree(ROOT/"baseline",stage/"baseline",ignore=shutil.ignore_patterns("__pycache__","*.pyc"))
         shutil.copytree(ROOT/"frontend",stage/"frontend",ignore=shutil.ignore_patterns("node_modules","dist","test-results","playwright-report","e2e"))
         shutil.copytree(ROOT/'deployment',stage/'deployment')

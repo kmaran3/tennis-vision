@@ -59,6 +59,12 @@ def railway():
     report.update(status='budget_inspected_deployment_deferred',workspace_id=workspace,account=account,
       resource_pricing_source='https://docs.railway.com/pricing',
       deployment_reason='The local process peak is not a container billing forecast. A conservative 0.5 GB RAM budget alone uses the $5 monthly Hobby allowance at $10/GB/month, before existing services, CPU, storage or egress. No zero-additional-charge deployment is established.')
+    decision_path=ARTIFACTS/'railway-budget-decision.json'
+    if decision_path.exists():
+        decision=json.loads(decision_path.read_text())
+        limit=account.get('customer',{}).get('usageLimit') or {}
+        if decision.get('status')=='approved_limit_set_and_read_back' and limit.get('hardLimit')==decision.get('requested_hard_limit_usd'):
+            report.update(status='approved_compute_limit_verified',approved_hard_limit_usd=decision['requested_hard_limit_usd'],deployment_reason='The user approved this shared workspace compute cap. Check current usage and actual service settings; this does not certify the remaining application release gates.')
     return report
 
 if __name__=='__main__':

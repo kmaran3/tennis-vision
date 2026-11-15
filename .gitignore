@@ -31,3 +31,4 @@ data/cache/
 
 frontend/test-results/
 frontend/playwright-report/
+test-results/

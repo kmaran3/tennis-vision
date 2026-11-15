@@ -1,8 +1,10 @@
 # Baseline
 
-A historical ATP/WTA singles analytics platform: explore players, compare historical matchups, inspect archived results, and replay eligible point records. Python/FastAPI serves a React application from one service. This is a local implementation in progress, **not a completed public release**.
+A historical ATP/WTA singles analytics platform: explore players, compare historical matchups, inspect archived results, and replay eligible point records. Python/FastAPI serves a React application from one service. A browsing preview is deployed; the full first-release acceptance gates remain open.
 
-See the [accepted specification](tennis-analytics-project-plan.md) and [measured implementation status](docs/implementation-status.md). No computer vision, live scores, future schedules, doubles, lower-tour product, betting recommendations, or paid services are included.
+**[Open Baseline](https://tennis-vision-production.up.railway.app)**. Public browsing needs no account. The analyst requires an approved GitHub login and an available free-tier provider; live analyst evaluation is currently paused on provider failures.
+
+See the [accepted specification](tennis-analytics-project-plan.md) and [measured implementation status](docs/implementation-status.md). No computer vision, live scores, future schedules, doubles, lower-tour product, betting recommendations, paid data feeds or paid AI calls are included.
 
 ## Run locally
 
@@ -58,7 +60,7 @@ Statistics begin in 2000. Earlier matches initialize history. Source cutoffs and
 
 Rates use ratios of summed pairwise-valid counts, with sample sizes and denominators. Null differs from zero. Elo is as-of. Models and market reports use chronological windows; ATP and WTA identities/models remain separate. Model/market/coverage results are generated from actual data under `artifacts/`, never invented. Historical scenarios require a model trained before their date. Realized weather and odds never enter pre-match features.
 
-Current scope gaps are documented in the status file: broader enrichment verification and operational fixtures, measured live analyst evaluation, actual OAuth/provider behavior, container verification and deployment still have release gates.
+Current scope gaps are documented in the status file: broader enrichment verification, measured live analyst evaluation, actual GitHub browser consent and remaining release operations.
 
 ## Chat and deployment
 
@@ -66,7 +68,7 @@ Public browsing needs no credentials. Set configuration through local environmen
 
 Live chat is disabled unless `GEMINI_API_KEY` exists and `GEMINI_FREE_TIER_CONFIRMED=true` confirms billing is disabled on that project. The pinned provider identifier is `gemini-3.8-flash`; [official pricing](https://ai.google.dev/gemini-api/docs/pricing#gemini-3.8-flash) lists a free tier and [model capabilities](https://ai.google.dev/gemini-api/docs/models/gemini-3.8-flash) include function calling. The earlier 2.5 pin was rejected for new accounts; the replacement is a reviewed static pin. Exact project limits must be recorded from AI Studio; published quotas are not a guarantee. No paid fallback or automatic model upgrade exists. Temporary provider failures have at most three attempts on the same model; exhausted quota is not retried. Application caps: 5 tools, 20 user turns/day, 100 app turns/day, one active request/user, 2,000 output tokens. Quotas use a separate writable SQLite file, not the immutable serving database. Live evaluation pauses on provider or quota failure and makes no accuracy claim until reviewed.
 
-`Dockerfile` and `railway.toml` target one service and one worker; no training on startup. Deployment is gated on measured memory and verified remaining Hobby allowance. No deploy or spending change is automatic. See [release operations](docs/release.md).
+`Dockerfile` and `.railway/railway.ts` target one service and one worker; no training on startup. The service uses auto-sleep, 0.5 CPU, 512 MiB memory and a persistent quota volume. The owner approved a **$10 shared workspace compute hard limit** with a **$5 email alert**, retaining the existing Hobby tier. This permits usage above Hobby's included $5; reaching the shared cap can stop other projects. See [release operations](docs/release.md).
 
 ## Attribution
 

@@ -1,45 +1,46 @@
-# Current Railway setup
+# Railway deployment
 
-Target: **wonderful-truth / production / tennis-vision**.
+The historical browsing preview is live at **https://tennis-vision-production.up.railway.app**.
 
-Reserved public origin: `https://tennis-vision-production.up.railway.app`.
+Target: **wonderful-truth / production / tennis-vision**. Main receives the tested application through GitHub; the Docker build downloads the public serving archive pinned by exact URL, SHA-256, byte size, snapshot and metric version in `deployment/serving-release.json`. No training or full warehouse build runs on startup.
 
-The local CLI is linked to this target. Nine runtime variables, including the GitHub and Gemini credentials, were installed through stdin with `--skip-deploys`. Production uses a separate generated session secret. Secret values are not recorded in this guide or in Git. No new application deployment was started and no spending limits were changed.
+## Runtime configuration
 
-## User account step
+One service and worker, one replica in us-west2, auto-sleep, 0.5 CPU and 512 MiB memory. `/health/ready` checks database/model/metric agreement. The public domain targets port 8000, matching `PORT=8000`.
 
-Update the Baseline GitHub OAuth app:
+The persistent volume is attached at `/app/state`; `BASELINE_QUOTA_DB=/app/state/analyst-quota.sqlite`. A marker survived replacement of the running container. The volume's 5 GB capacity is not a forecast of used storage; the quota ledger is small.
 
-- Homepage URL: `https://tennis-vision-production.up.railway.app`
-- Add authorization callback URL: `https://tennis-vision-production.up.railway.app/api/v1/auth/callback`
-- Retain the localhost callback for local testing if the form allows multiple callbacks.
+Runtime secrets are installed through Railway variables. Production uses a separate session secret from local development. GitHub OAuth uses this homepage and callback:
 
-## Deployment work still required
+- Homepage: `https://tennis-vision-production.up.railway.app`
+- Callback: `https://tennis-vision-production.up.railway.app/api/v1/auth/callback`
 
-The existing failed Railway deployment points at `e7908e9`, the acquisition-only repository commit. The application implementation is pushed to `baseline-release`; the serving database remains intentionally outside Git. `deployment/serving-release.json` pins a public GitHub release asset by exact URL, SHA-256, byte size, source snapshot and metric version. The Docker build downloads and verifies it, including every extracted file checksum, before starting the app. The asset excludes account/credential/operating reports and preserves original data notices.
+No credentials are stored in Git, public assets, frontend bundles or this document. Actual GitHub browser consent must still be completed by the owner.
 
-The prepared local bundle at `artifacts/deploy/` contains application sources, the Dockerfile and the same pinned download manifest. Regenerate it after source/artifact changes:
+## Infrastructure changes
 
-```sh
-uv run python scripts/export_deploy.py
-```
-
-After verifying the authorized hosting allowance and container/runtime requirements, the explicit bundle upload command is:
+New Railway services no longer read legacy `railway.toml` settings. This repository uses `.railway/railway.ts`, TypeScript SDK 3.17.0 and CLI 5.74.0. Install the locked development SDK and inspect changes:
 
 ```sh
-railway up artifacts/deploy --path-as-root --no-gitignore \
-  --project 34f5145c-abbd-4ffa-9a3e-f6d8283b28ce \
-  --environment production --service tennis-vision
+npm ci
+npm run infra:check
+npm run infra:plan
 ```
 
-This command starts a real deployment and must not run before the no-additional-charge condition is satisfied. `--no-gitignore` is appropriate only for this clean exported context, which excludes credentials and raw sources. GitHub-triggered deployments use the same pinned artifact download. Activating the release on the connected `main` branch will deploy it, so that push remains subject to the hosting budget gate.
+The named partial owns only this service and its quota volume. Secrets are unmanaged: the plan never reads or changes their values. Review the plan before applying:
 
-Authenticated analyst quotas require durable storage mounted at `/app/state`; `BASELINE_QUOTA_DB` is staged as `/app/state/analyst-quota.sqlite`. Volume cost belongs in the hosting calculation. No volume was created.
+```sh
+npm run infra:apply -- --yes
+```
 
-The generated domain is reserved; it does not indicate a healthy application. Final checks require `/health/ready`, public browsing, actual OAuth consent, provider/quota failures and rollback at the host. Live analyst evaluation is currently paused on Google's HTTP 503 high-demand responses.
+Apply only expected changes. A normal settings update must not delete variables, detach/delete the volume, or change unrelated resources. The migration was applied from a pinned plan containing only two safe service updates. Afterward, the plan had no drift and cgroups confirmed the running limits. Code pushes deploy automatically; infrastructure-file edits require the explicit plan/apply step. Watch patterns avoid application rebuilds for documentation-only changes.
 
-## Hosting budget constraint
+## Approved budget
 
-The user's budget is the existing Hobby plan's $5 included monthly resource usage, shared with other projects. At inspection the workspace had approximately $1.36 of current-cycle usage and no compute hard limit. Railway's [documented native compute hard limit starts at $10](https://docs.railway.com/cli/usage), which exceeds this budget and applies across the workspace. No shared limit was changed.
+The owner approved a **$10 shared workspace compute hard limit** and **$5 email alert**, which were set and read back. The Hobby subscription was not upgraded. This can allow usage above the included $5; reaching the shared limit can stop other workspace projects. Do not change these limits without authorization.
 
-The prepared service configuration enables auto-sleep, one replica, 0.5 CPU and 512 MiB memory. Its production image passed CI within those resource limits. These controls and the lighter inference imports reduce expected usage; they do not enforce a $5 maximum bill. The release branch is pushed and validated, but the connected `main` branch remains unchanged until this constraint is resolved. Do not promise a $5 spending guarantee from a memory estimate.
+## Verification and remaining gates
+
+49 offline tests and production-image checks passed. The public host passed 24 API checks and desktop/mobile browser flows. OAuth redirect/state/cookie and rejected-access checks passed using operator test sessions. The persistent ledger and mount were checked on the actual service.
+
+Google's free-tier analyst requests currently time out or return service errors. Browsing, predictions, replay and saved examples remain available. The fixed 60-question analyst evaluation is resumable and has not passed. Most venue assignments remain explicitly unavailable. Deployment of this preview does not mark the complete first release accepted.

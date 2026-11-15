@@ -9,7 +9,7 @@ This specification supersedes the former vision-oriented plan. The product is a 
 - Public browsing; live analyst restricted to the owner and explicitly allowed GitHub users.
 - Custom React interface, off-white backgrounds and deep-green accents; initial avatars use text.
 - Existing Railway Hobby account, one application service serving frontend and FastAPI.
-- No additional spending, paid feeds, paid AI fallback, paid grounding, billing activation, or provider upgrades.
+- Deployment budget amendment: the user approved a $10 shared workspace compute hard limit and $5 email alert on the existing Hobby tier, without a plan upgrade. The cap can allow usage above the included $5 and can stop other projects. No paid feeds, paid AI fallback, paid grounding, Google billing activation, or automatic provider upgrades.
 - Free-tier Gemini tool calling; provider identity and limits must be verified and recorded.
 - Every page states source cutoff; latest season explicitly incomplete. Download recency, latest event date, and completeness are separate facts.
 
@@ -107,6 +107,6 @@ Temporal/model: no current/future data, frozen tournament features, no preproces
 
 Application/security: empty/ambiguous searches, unsupported/cross-tour scenarios, missing coverage, keyboard/responsive flows, chart/table totals, shareable URLs, API bounds/timeouts, OAuth state/origin rejection, no secrets in Git/bundles/logs, prompt injection cannot expand permissions, quota/provider degradation, version readiness, tested rollback.
 
-Before deployment inspect the existing Railway workspace usage and remaining included allowance; measure memory/projected usage. One service only. Existing Hobby subscription does not guarantee zero additional cost. Defer deployment unless it fits the remaining authorized allowance; do not change shared spending limits. Atomic immutable releases retain a previous tested version for rollback.
+Before deployment inspect the existing Railway workspace usage, approved spending limit and measured memory/projected usage. One service only. Existing Hobby subscription does not guarantee zero additional cost. The user explicitly approved the $10 shared compute cap and $5 alert; later shared-limit changes require authorization. Use .railway/railway.ts Infrastructure as Code with scoped ownership and unmanaged secrets; legacy railway.toml is unsupported for new services. Atomic immutable releases retain a previous tested version for rollback.
 
 Release is complete only when public browsing, documented historical matchups, eligible replay, enrichment accounting, approved-user chat, reproducible model/market/agent reports, governed/statistical provenance, authorized hosting cost, and newcomer sample reproduction all work. README reports actual measured coverage and limitations, not this target as an accomplished release.

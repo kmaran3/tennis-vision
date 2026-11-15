@@ -1,0 +1,13 @@
+{
+  "devDependencies": {
+    "railway": "3.17.0"
+  },
+  "name": "baseline-infrastructure",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "infra:plan": "npx --yes @railway/cli@5.74.0 config plan",
+    "infra:apply": "npx --yes @railway/cli@5.74.0 config apply",
+    "infra:check": "node --experimental-strip-types --input-type=module -e \"import configure from './.railway/railway.ts'; import {createRailwayContext,project} from 'railway/iac'; await configure(createRailwayContext({environment:'production'}),project);\""
+  }
+}

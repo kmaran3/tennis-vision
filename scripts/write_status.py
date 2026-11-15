@@ -78,6 +78,15 @@ def main():
         note=("5. The production Docker image built and passed browsing, metric, historical replay and matchup/symmetry checks on GitHub under a 512 MiB / 0.5 CPU container limit. Local Docker remains unavailable; no local container result is claimed. "
               "A production activation still requires a resolved hosting budget, durable quota storage, actual host checks and GitHub browser consent. Live analyst evaluation remains separately gated on provider availability.")
         lines=[note if line.startswith('5. ') else line for line in lines]
+    production_path=ARTIFACTS/'railway-production-verification.json'
+    if production_path.exists():
+        production=json.loads(production_path.read_text())
+        if production.get('status')=='passed':
+            intro=(f"A historical browsing preview is deployed at {production['public_origin']}. The full first-release acceptance gates remain open: live analyst quality has not passed evaluation and most venue enrichment remains explicitly unavailable.")
+            lines[2]=intro
+            lines=[("1. Production GitHub OAuth redirect, signed state, secure HTTP-only cookie, rejected invalid states/origins, anonymous access and unapproved-user rejection passed. Approved-session checks used operator-signed test fixtures; actual GitHub browser consent still needs the owner to sign in.") if line.startswith('1. ') else line for line in lines]
+            lines=[("4. The user approved a $10 shared workspace compute hard limit and a $5 email alert on the existing Hobby tier. Both limits were set and read back. One application service is deployed with auto-sleep, 0.5 CPU, 512 MiB memory and durable quota storage. The $10 cap can allow charges above the plan's included $5 and can stop other workspace projects. No plan upgrade was made.") if line.startswith('4. ') else line for line in lines]
+            lines=[(f"5. Public-host verification passed {production['public_api_checks']} API requests across both tours, metrics, replay and matchup symmetry, in addition to the production-container CI checks. Running-container cgroups confirmed the intended limits; a storage marker survived a new deployment. Legacy railway.toml was replaced by a reviewed service-scoped .railway/railway.ts plan, with secrets unmanaged and the existing volume retained. Actual host evidence is in artifacts/railway-production-verification.json and artifacts/production-resources-storage.json. Browser consent and live analyst evaluation remain outstanding.") if line.startswith('5. ') else line for line in lines]
     lines=[line.replace('38 offline tests',f'{test_count} offline tests') for line in lines]
     (ROOT/"docs/implementation-status.md").write_text("\n".join(lines))
     readme=ROOT/"README.md";text=readme.read_text();marker="\n## Measured local build\n"
